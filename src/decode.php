@@ -3,7 +3,7 @@
 //header ("Content-Type:text/xml");
 //syslog(LOG_ERR, "message to send to log");
 
-//$query = "%5D & > \u0058"; // URL,
+//$query = "%5D & > \u0058"; // URL, 
 // ****************
 
 require_once('workflows.php');
@@ -41,15 +41,6 @@ function html_decode($str) {
 	return str_replace(array("&lt;", "&gt;", '&amp;', '&#039;', '&quot;','&lt;', '&gt;'), array("<", ">",'&','\'','"','<','>'), htmlspecialchars_decode($str, ENT_NOQUOTES));
 }
 
-function urlsafe_b64decode($string) {
-    $data = str_replace(array('-','_'),array('+','/'),$string);
-    $mod4 = strlen($data) % 4;
-    if ($mod4) {
-        $data .= substr('====', $mod4);
-    }
-    return base64_decode($data);
-}
-
 if (0) {
 	echo "".$query."\n";
 	echo "urlencode = ".urldecode($query)."\n";
@@ -57,7 +48,7 @@ if (0) {
 	echo "unicode = ".preg_replace_callback('/\\\\u([0-9a-f]{4})/i', 'replace_unicode_escape_sequence', $query)."\n";
 	echo "htmlentities = ".html_entity_decode($query)."\n";
 	echo "base64_encode = ".base64_decode($query)."\n";
-
+	
 	exit();
 }
 
@@ -78,11 +69,16 @@ if ($html_decode != $query) $decodes["HTML Decoded"] = $html_decode;
 $base64_decode = base64_decode($query, true);
 if ($base64_decode && $base64_decode != $query) { $decodes["base64 Decoded"] = $base64_decode; }
 
-// urlsafe base64
-$urlsafe_base64_decode = urlsafe_b64decode($query);
-if ($urlsafe_base64_decode && $urlsafe_base64_decode != $query) { $decodes["base64(urlsafe) Decoded"] = $urlsafe_base64_decode; }
-
 //$dencodes["UTF-8 Decoded"] = utf8_decode($query);
+if(is_numeric($query)&&($timestamp=substr($query,0,10))){
+
+	$datetimeFormat = 'Y-m-d H:i:s.u T O';
+	$date = new \DateTime('now', new \DateTimeZone('Asia/Shanghai'));
+	$date->setTimestamp($timestamp);
+	$date_decode = $date->format($datetimeFormat);
+	if ($date_decode && $date_decode != $query) { $decodes["Date Decoded"] = $date_decode; }
+}
+
 
 $decodes = prepare_output($decodes);
 
